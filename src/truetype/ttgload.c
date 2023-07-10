@@ -820,7 +820,7 @@
       FT_ARRAY_COPY( zone->org, zone->cur, zone->n_points );
 
     /* Reset graphics state. */
-    loader->exec->GS = loader->size->GS;
+    exec->GS = loader->size->GS;
 
     /* XXX: UNDOCUMENTED! Hinting instructions of a composite glyph */
     /*      completely refer to the (already) hinted subglyphs.     */
@@ -860,7 +860,7 @@
       exec->is_composite = is_composite;
       exec->pts          = *zone;
 
-      error = TT_Run_Context( loader->exec );
+      error = TT_Run_Context( exec );
       if ( error && exec->pedantic_hinting )
         return error;
 
@@ -1612,8 +1612,14 @@
     else
 
 #endif /* FT_CONFIG_OPTION_INCREMENTAL */
+    {
+      FT_ULong  len;
 
-      offset = tt_face_get_location( face, glyph_index, &loader->byte_len );
+
+      offset = tt_face_get_location( FT_FACE( face ), glyph_index, &len );
+
+      loader->byte_len = (FT_UInt)len;
+    }
 
     if ( loader->byte_len > 0 )
     {
@@ -2796,7 +2802,9 @@
 #ifdef FT_CONFIG_OPTION_SVG
 
     /* check for OT-SVG */
-    if ( ( load_flags & FT_LOAD_COLOR ) && face->svg )
+    if ( ( load_flags & FT_LOAD_NO_SVG ) == 0 &&
+         ( load_flags & FT_LOAD_COLOR )       &&
+         face->svg                            )
     {
       SFNT_Service  sfnt = (SFNT_Service)face->sfnt;
 

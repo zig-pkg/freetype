@@ -312,7 +312,8 @@
 #define TRICK_SFNT_IDS_NUM_FACES  31
 
     static const tt_sfnt_id_rec sfnt_id[TRICK_SFNT_IDS_NUM_FACES]
-                                       [TRICK_SFNT_IDS_PER_FACE] = {
+                                       [TRICK_SFNT_IDS_PER_FACE] =
+    {
 
 #define TRICK_SFNT_ID_cvt   0
 #define TRICK_SFNT_ID_fpgm  1
@@ -581,7 +582,7 @@
     FT_Bool   result = FALSE;
 
     TT_Face   face = (TT_Face)ttface;
-    FT_UInt   asize;
+    FT_ULong  asize;
     FT_ULong  i;
     FT_ULong  glyph_index = 0;
     FT_UInt   count       = 0;
@@ -589,7 +590,7 @@
 
     for( i = 0; i < face->num_locations; i++ )
     {
-      tt_face_get_location( face, i, &asize );
+      tt_face_get_location( ttface, i, &asize );
       if ( asize > 0 )
       {
         count += 1;
@@ -777,7 +778,6 @@
     }
 
 #ifdef TT_CONFIG_OPTION_GX_VAR_SUPPORT
-
     {
       FT_UInt  instance_index = (FT_UInt)face_index >> 16;
 
@@ -785,14 +785,11 @@
       if ( FT_HAS_MULTIPLE_MASTERS( ttface ) &&
            instance_index > 0                )
       {
-        error = TT_Set_Named_Instance( face, instance_index );
+        error = FT_Set_Named_Instance( ttface, instance_index );
         if ( error )
           goto Exit;
-
-        tt_apply_mvar( face );
       }
     }
-
 #endif /* TT_CONFIG_OPTION_GX_VAR_SUPPORT */
 
     /* initialize standard glyph loading routines */
@@ -858,7 +855,7 @@
     face->cvt_program_size  = 0;
 
 #ifdef TT_CONFIG_OPTION_GX_VAR_SUPPORT
-    tt_done_blend( face );
+    tt_done_blend( ttface );
     face->blend = NULL;
 #endif
   }
@@ -1346,12 +1343,16 @@
    *   Used for variation fonts as an iterator function.
    *
    * @Input:
-   *   size ::
-   *     A handle to the target size object.
+   *   ft_size ::
+   *     A handle to the target TT_Size object. This function will be called
+   *     through a `FT_Size_Reset_Func` pointer which takes `FT_Size`. This
+   *     function must take `FT_Size` as a result. The passed `FT_Size` is
+   *     expected to point to a `TT_Size`.
    */
   FT_LOCAL_DEF( FT_Error )
-  tt_size_reset_height( TT_Size  size )
+  tt_size_reset_height( FT_Size  ft_size )
   {
+    TT_Size           size         = (TT_Size)ft_size;
     TT_Face           face         = (TT_Face)size->root.face;
     FT_Size_Metrics*  size_metrics = &size->hinted_metrics;
 
@@ -1408,7 +1409,7 @@
     FT_Size_Metrics*  size_metrics = &size->hinted_metrics;
 
 
-    error = tt_size_reset_height( size );
+    error = tt_size_reset_height( (FT_Size)size );
     if ( error )
       return error;
 

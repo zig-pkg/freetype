@@ -3547,7 +3547,8 @@
 
 #ifdef TT_SUPPORT_SUBPIXEL_HINTING_INFINALITY
     /* arguments to opcodes are skipped by `SKIP_Code' */
-    FT_Byte    opcode_pattern[9][12] = {
+    FT_Byte    opcode_pattern[9][12] =
+               {
                  /* #0 inline delta function 1 */
                  {
                    0x4B, /* PPEM    */
@@ -7670,20 +7671,23 @@
   /* documentation is in ttinterp.h */
 
   FT_EXPORT_DEF( FT_Error )
-  TT_RunIns( TT_ExecContext  exc )
+  TT_RunIns( void*  exec )
   {
+    TT_ExecContext  exc = (TT_ExecContext)exec;
+
     FT_ULong   ins_counter = 0;  /* executed instructions counter */
     FT_ULong   num_twilight_points;
     FT_UShort  i;
 
 #ifdef TT_SUPPORT_SUBPIXEL_HINTING_INFINALITY
-    FT_Byte    opcode_pattern[1][2] = {
-                  /* #8 TypeMan Talk Align */
-                  {
-                    0x06, /* SPVTL   */
-                    0x7D, /* RDTG    */
-                  },
-                };
+    FT_Byte    opcode_pattern[1][2] =
+               {
+                 /* #8 TypeMan Talk Align */
+                 {
+                   0x06, /* SPVTL   */
+                   0x7D, /* RDTG    */
+                 },
+               };
     FT_UShort  opcode_patterns   = 1;
     FT_UShort  opcode_pointer[1] = { 0 };
     FT_UShort  opcode_size[1]    = { 1 };
@@ -7837,7 +7841,7 @@
         /* a variable number of arguments             */
 
         /* it is the job of the application to `activate' GX handling, */
-        /* this is, calling any of the GX API functions on the current */
+        /* that is, calling any of the GX API functions on the current */
         /* font to select a variation instance                         */
         if ( exc->face->blend )
           exc->new_top = exc->args + exc->face->blend->num_axis;
@@ -8397,7 +8401,7 @@
 #ifdef TT_CONFIG_OPTION_GX_VAR_SUPPORT
         case 0x91:
           /* it is the job of the application to `activate' GX handling, */
-          /* this is, calling any of the GX API functions on the current */
+          /* that is, calling any of the GX API functions on the current */
           /* font to select a variation instance                         */
           if ( exc->face->blend )
             Ins_GETVARIATION( exc, args );
