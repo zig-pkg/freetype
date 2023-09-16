@@ -332,9 +332,9 @@ FT_BEGIN_HEADER
    * Based on geometric considerations we use the following inequality to
    * identify a degenerate matrix.
    *
-   *   50 * abs(xx*yy - xy*yx) < xx^2 + xy^2 + yx^2 + yy^2
+   *   32 * abs(xx*yy - xy*yx) < xx^2 + xy^2 + yx^2 + yy^2
    *
-   * Value 50 is heuristic.
+   * Value 32 is heuristic.
    */
   FT_BASE( FT_Bool )
   FT_Matrix_Check( const FT_Matrix*  matrix );
@@ -509,8 +509,8 @@ FT_BEGIN_HEADER
    * @note:
    *   This function is not very fast.
    */
-  FT_BASE( FT_Int32 )
-  FT_SqrtFixed( FT_Int32  x );
+  FT_BASE( FT_UInt32 )
+  FT_SqrtFixed( FT_UInt32  x );
 
 #endif /* 0 */
 
