@@ -993,8 +993,8 @@
     FT_Error   error  = FT_Err_Ok;
 
     GX_ItemVarData    varData;
-    FT_ItemVarDelta*  deltaSet = NULL;
-    FT_ItemVarDelta   deltaSetStack[16];
+    FT_Int32*  deltaSet = NULL;
+    FT_Int32   deltaSetStack[16];
 
     FT_Fixed*  scalars = NULL;
     FT_Fixed   scalarsStack[16];
@@ -1239,10 +1239,8 @@
       innerIndex = gindex;
     }
 
-    delta = tt_var_get_item_delta( FT_FACE( face ),
-                                   &table->itemStore,
-                                   outerIndex,
-                                   innerIndex );
+    delta = FIXED_TO_INT( tt_var_get_item_delta(
+        FT_FACE( face ), &table->itemStore, outerIndex, innerIndex ) );
 
     if ( delta )
     {
@@ -1544,11 +1542,9 @@
       FT_Short*  p = ft_var_get_value_pointer( ttface, value->tag );
       FT_Int     delta;
 
-
-      delta = tt_var_get_item_delta( face,
-                                     &blend->mvar_table->itemStore,
-                                     value->outerIndex,
-                                     value->innerIndex );
+      delta = FIXED_TO_INT(
+          tt_var_get_item_delta( face, &blend->mvar_table->itemStore,
+                                 value->outerIndex, value->innerIndex ) );
 
       if ( p && delta )
       {
@@ -2136,10 +2132,8 @@
             innerIndex = table->axisMap.innerIndex[idx];
           }
 
-          delta = tt_var_get_item_delta( FT_FACE( face ),
-                                         &table->itemStore,
-                                         outerIndex,
-                                         innerIndex );
+          delta = FIXED_TO_INT( tt_var_get_item_delta(
+              FT_FACE( face ), &table->itemStore, outerIndex, innerIndex ) );
 
 	  v += delta << 2;
 

@@ -760,12 +760,12 @@
                                              item_deltas ) )
           return 0;
 
-        apaint->u.linear_gradient.p0.x += INT_TO_FIXED( item_deltas[0] );
-        apaint->u.linear_gradient.p0.y += INT_TO_FIXED( item_deltas[1] );
-        apaint->u.linear_gradient.p1.x += INT_TO_FIXED( item_deltas[2] );
-        apaint->u.linear_gradient.p1.y += INT_TO_FIXED( item_deltas[3] );
-        apaint->u.linear_gradient.p2.x += INT_TO_FIXED( item_deltas[4] );
-        apaint->u.linear_gradient.p2.y += INT_TO_FIXED( item_deltas[5] );
+        apaint->u.linear_gradient.p0.x += item_deltas[0];
+        apaint->u.linear_gradient.p0.y += item_deltas[1];
+        apaint->u.linear_gradient.p1.x += item_deltas[2];
+        apaint->u.linear_gradient.p1.y += item_deltas[3];
+        apaint->u.linear_gradient.p2.x += item_deltas[4];
+        apaint->u.linear_gradient.p2.y += item_deltas[5];
       }
 #endif
 
@@ -818,16 +818,16 @@
                                              item_deltas ) )
           return 0;
 
-        apaint->u.radial_gradient.c0.x += INT_TO_FIXED( item_deltas[0] );
-        apaint->u.radial_gradient.c0.y += INT_TO_FIXED( item_deltas[1] );
+        apaint->u.radial_gradient.c0.x += item_deltas[0];
+        apaint->u.radial_gradient.c0.y += item_deltas[1];
 
         // TODO: Anything to be done about UFWORD deltas here?
-        apaint->u.radial_gradient.r0 += INT_TO_FIXED( item_deltas[2] );
+        apaint->u.radial_gradient.r0 += item_deltas[2];
 
-        apaint->u.radial_gradient.c1.x += INT_TO_FIXED( item_deltas[3] );
-        apaint->u.radial_gradient.c1.y += INT_TO_FIXED( item_deltas[4] );
+        apaint->u.radial_gradient.c1.x += item_deltas[3];
+        apaint->u.radial_gradient.c1.y += item_deltas[4];
 
-        apaint->u.radial_gradient.r1 += INT_TO_FIXED( item_deltas[5] );
+        apaint->u.radial_gradient.r1 += item_deltas[5];
       }
 #endif
 
@@ -869,14 +869,11 @@
                                              item_deltas ) )
           return 0;
 
-        // TODO: Handle overflow?
-        apaint->u.sweep_gradient.center.x += INT_TO_FIXED( item_deltas[0] );
-        apaint->u.sweep_gradient.center.y += INT_TO_FIXED( item_deltas[1] );
+        apaint->u.sweep_gradient.center.x += item_deltas[0];
+        apaint->u.sweep_gradient.center.y += item_deltas[1];
 
-        apaint->u.sweep_gradient.start_angle +=
-          F2DOT14_TO_FIXED( item_deltas[2] );
-        apaint->u.sweep_gradient.end_angle +=
-          F2DOT14_TO_FIXED( item_deltas[3] );
+        apaint->u.sweep_gradient.start_angle += item_deltas[2] >> 14;
+        apaint->u.sweep_gradient.end_angle   += item_deltas[3] >> 14;
       }
 #endif
       apaint->format = FT_COLR_PAINTFORMAT_SWEEP_GRADIENT;
@@ -965,8 +962,8 @@
                                              item_deltas ) )
           return 0;
 
-        apaint->u.translate.dx += INT_TO_FIXED( item_deltas[0] );
-        apaint->u.translate.dy += INT_TO_FIXED( item_deltas[1] );
+        apaint->u.translate.dx += item_deltas[0];
+        apaint->u.translate.dy += item_deltas[1];
       }
 #endif
 
@@ -1044,8 +1041,8 @@
                                                item_deltas ) )
             return 0;
 
-          apaint->u.scale.scale_x += F2DOT14_TO_FIXED( item_deltas[0] );
-          apaint->u.scale.scale_y += F2DOT14_TO_FIXED( item_deltas[1] );
+          apaint->u.scale.scale_x += item_deltas[0] >> 14;
+          apaint->u.scale.scale_y += item_deltas[1] >> 14;
         }
 
         if ( (FT_PaintFormat_Internal)apaint->format ==
@@ -1055,10 +1052,10 @@
                                                item_deltas ) )
             return 0;
 
-          apaint->u.scale.scale_x  += F2DOT14_TO_FIXED( item_deltas[0] );
-          apaint->u.scale.scale_y  += F2DOT14_TO_FIXED( item_deltas[1] );
-          apaint->u.scale.center_x += INT_TO_FIXED( item_deltas[2] );
-          apaint->u.scale.center_y += INT_TO_FIXED( item_deltas[3] );
+          apaint->u.scale.scale_x  += item_deltas[0] >> 14;
+          apaint->u.scale.scale_y  += item_deltas[1] >> 14;
+          apaint->u.scale.center_x += item_deltas[2];
+          apaint->u.scale.center_y += item_deltas[3];
         }
 
         if ( (FT_PaintFormat_Internal)apaint->format ==
@@ -1068,8 +1065,8 @@
                                                item_deltas ) )
             return 0;
 
-          apaint->u.scale.scale_x += F2DOT14_TO_FIXED( item_deltas[0] );
-          apaint->u.scale.scale_y += F2DOT14_TO_FIXED( item_deltas[0] );
+          apaint->u.scale.scale_x += item_deltas[0] >> 14;
+          apaint->u.scale.scale_y += item_deltas[0] >> 14;
         }
 
         if ( (FT_PaintFormat_Internal)apaint->format ==
@@ -1079,10 +1076,10 @@
                                                item_deltas ) )
             return 0;
 
-          apaint->u.scale.scale_x  += F2DOT14_TO_FIXED( item_deltas[0] );
-          apaint->u.scale.scale_y  += F2DOT14_TO_FIXED( item_deltas[0] );
-          apaint->u.scale.center_x += INT_TO_FIXED( item_deltas[1] );
-          apaint->u.scale.center_y += INT_TO_FIXED( item_deltas[2] );
+          apaint->u.scale.scale_x  += item_deltas[0] >> 14;
+          apaint->u.scale.scale_y  += item_deltas[0] >> 14;
+          apaint->u.scale.center_x += item_deltas[1];
+          apaint->u.scale.center_y += item_deltas[2];
         }
       }
 #endif
@@ -1148,12 +1145,12 @@
                                                num_deltas, item_deltas ) )
             return 0;
 
-          apaint->u.rotate.angle += F2DOT14_TO_FIXED( item_deltas[0] );
+          apaint->u.rotate.angle += item_deltas[0] >> 14;
 
           if ( num_deltas == 3 )
           {
-            apaint->u.rotate.center_x += INT_TO_FIXED( item_deltas[1] );
-            apaint->u.rotate.center_y += INT_TO_FIXED( item_deltas[2] );
+            apaint->u.rotate.center_x += item_deltas[1];
+            apaint->u.rotate.center_y += item_deltas[2];
           }
         }
       }
@@ -1212,8 +1209,8 @@
                                                item_deltas ) )
             return 0;
 
-          apaint->u.skew.x_skew_angle += F2DOT14_TO_FIXED( item_deltas[0] );
-          apaint->u.skew.y_skew_angle += F2DOT14_TO_FIXED( item_deltas[1] );
+          apaint->u.skew.x_skew_angle += item_deltas[0] >> 14;
+          apaint->u.skew.y_skew_angle += item_deltas[1] >> 14;
         }
 
         if ( (FT_PaintFormat_Internal)apaint->format ==
@@ -1223,10 +1220,10 @@
                                                item_deltas ) )
             return 0;
 
-          apaint->u.skew.x_skew_angle += F2DOT14_TO_FIXED( item_deltas[0] );
-          apaint->u.skew.y_skew_angle += F2DOT14_TO_FIXED( item_deltas[1] );
-          apaint->u.skew.center_x     += INT_TO_FIXED( item_deltas[2] );
-          apaint->u.skew.center_y     += INT_TO_FIXED( item_deltas[3] );
+          apaint->u.skew.x_skew_angle += item_deltas[0] >> 14;
+          apaint->u.skew.y_skew_angle += item_deltas[1] >> 14;
+          apaint->u.skew.center_x     += item_deltas[2];
+          apaint->u.skew.center_y     += item_deltas[3];
         }
       }
 #endif
@@ -1463,13 +1460,13 @@
             return 0;
 
           font_clip_box.xMin +=
-            FT_MulFix( item_deltas[0], face->root.size->metrics.x_scale );
+            FT_MulFix( FIXED_TO_INT( item_deltas[0] ), face->root.size->metrics.x_scale );
           font_clip_box.yMin +=
-            FT_MulFix( item_deltas[1], face->root.size->metrics.y_scale );
+            FT_MulFix( FIXED_TO_INT( item_deltas[1] ), face->root.size->metrics.y_scale );
           font_clip_box.xMax +=
-            FT_MulFix( item_deltas[2], face->root.size->metrics.x_scale );
+            FT_MulFix( FIXED_TO_INT( item_deltas[2] ), face->root.size->metrics.x_scale );
           font_clip_box.yMax +=
-            FT_MulFix( item_deltas[3], face->root.size->metrics.y_scale );
+            FT_MulFix( FIXED_TO_INT( item_deltas[3] ), face->root.size->metrics.y_scale );
         }
 #endif
 
@@ -1636,8 +1633,7 @@
 
 #ifdef TT_CONFIG_OPTION_GX_VAR_SUPPORT
       {
-        FT_Int  item_deltas[2];
-
+        FT_Fixed item_deltas[2];
 
         if ( !get_deltas_for_var_index_base( face, colr,
                                              var_index_base,
@@ -1645,7 +1641,7 @@
                                              item_deltas ) )
           return 0;
 
-        color_stop->stop_offset += F2DOT14_TO_FIXED( item_deltas[0] );
+        color_stop->stop_offset += item_deltas[0] >> 14;
         color_stop->color.alpha += (FT_F2Dot14)item_deltas[1];
       }
 #else
