@@ -469,10 +469,8 @@ typedef ptrdiff_t  FT_PtrDist;
   } TPixmap;
 
   /* maximum number of gray cells in the buffer */
-#if FT_RENDER_POOL_SIZE > 2048
+#if defined( FT_GRAY_POOL_SIZE ) && FT_GRAY_POOL_SIZE > 2048
 #define FT_MAX_GRAY_POOL  ( FT_RENDER_POOL_SIZE / sizeof ( TCell ) )
-#else
-#define FT_MAX_GRAY_POOL  ( 2048 / sizeof ( TCell ) )
 #endif
 
   /* FT_Span buffer size for direct rendering only */
@@ -490,6 +488,7 @@ typedef ptrdiff_t  FT_PtrDist;
   typedef struct  gray_TWorker_
   {
     ft_jmp_buf  jump_buffer;
+    FT_Memory   memory;
 
     TCoord  min_ex, max_ex;  /* min and max integer pixel coordinates */
     TCoord  min_ey, max_ey;
@@ -1860,15 +1859,57 @@ typedef ptrdiff_t  FT_PtrDist;
   }
 
 
+  /*
+   * The taxicab perimeter of the entire outline is used to estimate
+   * the necessary memory pool or the job size in general.  Clipping
+   * is ignored because it might hurt the performance.
+   */
+  static long
+  gray_taxi( RAS_ARG )
+  {
+    FT_Outline*  outline = &ras.outline;
+    short        c, p, first, last;
+    FT_Vector    d, v;
+    FT_Pos       taxi;
+
+
+    taxi = 0;
+    last = -1;
+    for ( c = 0; c < outline->n_contours; c++ )
+    {
+      first = last + 1;
+      last = outline->contours[c];
+
+      d = outline->points[last];
+      for ( p = first; p <= last; p++ )
+      {
+        v    = outline->points[p];
+        d.x -= v.x;
+        d.y -= v.y;
+
+        taxi += FT_ABS( d.x ) + FT_ABS( d.y );
+
+        d = v;
+      }
+    }
+
+    return taxi >> 6;
+  }
+
+
   static int
   gray_convert_glyph( RAS_ARG )
   {
     const TCoord  yMin = ras.min_ey;
     const TCoord  yMax = ras.max_ey;
 
-    TCell    buffer[FT_MAX_GRAY_POOL];
+    FT_Error   error = FT_THROW( Ok );
+    FT_Memory  memory = ras.memory;
+
+    TCell*   buffer;
     size_t   height = (size_t)( yMax - yMin );
-    size_t   n = FT_MAX_GRAY_POOL / 8;
+    size_t   n;
+    long     size;
     TCoord   y;
     TCoord   bands[32];  /* enough to accommodate bisections */
     TCoord*  band;
@@ -1876,8 +1917,39 @@ typedef ptrdiff_t  FT_PtrDist;
     int  continued = 0;
 
 
+    size = gray_taxi( RAS_VAR );
+
+    /* taxicab perimeters in excess of 20 CBox perimeters are */
+    /* not drawn unless in direct mode with possible clipping */
+    if ( !ras.render_span                                     &&
+         size > 20 * 2 * ( ras.max_ex - ras.min_ex + height ) )
+    {
+      FT_TRACE5(( "Blanking on taxi:cbox = %.2lf\n",
+                  0.5 * size / ( ras.max_ex - ras.min_ex + height ) ));
+      return FT_THROW( Ok );
+    }
+
+    size += height * sizeof ( PCell ) / sizeof ( TCell ) +
+            9;  /* empirical extra for local extrema */
+
+#ifdef FT_MAX_GRAY_POOL
+    if ( size > FT_MAX_GRAY_POOL )
+    {
+      /* both divisions rounded up */
+      n      = ( size + FT_MAX_GRAY_POOL - 1 ) / FT_MAX_GRAY_POOL;
+      height = ( height + n - 1 ) / n;
+      size   = FT_MAX_GRAY_POOL;
+    }
+#endif
+
+    if ( FT_QNEW_ARRAY( buffer, size ) )
+      return error;
+
+    FT_TRACE7(( "Allocated %ld cells (%ld bytes)\n",
+                size, size * sizeof ( TCell ) ));
+
     /* Initialize the null cell at the end of the poll. */
-    ras.cell_null        = buffer + FT_MAX_GRAY_POOL - 1;
+    ras.cell_null        = buffer + size - 1;
     ras.cell_null->x     = CELL_MAX_X_VALUE;
     ras.cell_null->area  = 0;
     ras.cell_null->cover = 0;
@@ -1885,13 +1957,6 @@ typedef ptrdiff_t  FT_PtrDist;
 
     /* set up vertical bands */
     ras.ycells     = (PCell*)buffer;
-
-    if ( height > n )
-    {
-      /* two divisions rounded up */
-      n       = ( height + n - 1 ) / n;
-      height  = ( height + n - 1 ) / n;
-    }
 
     for ( y = yMin; y < yMax; )
     {
@@ -1907,7 +1972,6 @@ typedef ptrdiff_t  FT_PtrDist;
       {
         TCoord  width = band[0] - band[1];
         TCoord  w;
-        int     error;
 
 
         for ( w = 0; w < width; ++w )
@@ -1936,7 +2000,7 @@ typedef ptrdiff_t  FT_PtrDist;
           continue;
         }
         else if ( error != Smooth_Err_Raster_Overflow )
-          return error;
+          goto Exit;
 
         /* render pool overflow; we will reduce the render band by half */
         width >>= 1;
@@ -1945,7 +2009,8 @@ typedef ptrdiff_t  FT_PtrDist;
         if ( width == 0 )
         {
           FT_TRACE7(( "gray_convert_glyph: rotten glyph\n" ));
-          return FT_THROW( Raster_Overflow );
+          error = FT_THROW( Raster_Overflow );
+          goto Exit;
         }
 
         band++;
@@ -1954,7 +2019,9 @@ typedef ptrdiff_t  FT_PtrDist;
       } while ( band >= bands );
     }
 
-    return Smooth_Err_Ok;
+  Exit:
+    FT_FREE( buffer );
+    return error;
   }
 
 
@@ -2039,6 +2106,8 @@ typedef ptrdiff_t  FT_PtrDist;
     /* exit if nothing to do */
     if ( ras.max_ex <= ras.min_ex || ras.max_ey <= ras.min_ey )
       return Smooth_Err_Ok;
+
+    ras.memory = (FT_Memory)((gray_PRaster)raster)->memory;
 
     return gray_convert_glyph( RAS_VAR );
   }
