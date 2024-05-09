@@ -284,7 +284,7 @@ FT_BEGIN_HEADER
    *   FT_MulAddFix
    *
    * @description:
-   *   Compute `(s[0] * f[0] + s[1] * f[1] + ...) / 0x10000`, where `s[n]` is
+   *   Compute `(s[0] * f[0] + s[1] * f[1] + ...)`, where `s[n]` is
    *   usually a 16.16 scalar.
    *
    * @input:
@@ -296,7 +296,7 @@ FT_BEGIN_HEADER
    *     The number of entries in the array.
    *
    * @return:
-   *   The result of `(s[0] * f[0] + s[1] * f[1] + ...) / 0x10000`.
+   *   The result of `(s[0] * f[0] + s[1] * f[1] + ...)`.
    *
    * @note:
    *   This function is currently used for the scaled delta computation of
@@ -306,7 +306,7 @@ FT_BEGIN_HEADER
    *   performance in comparison to the implementation base on `int64_t`.
    *
    */
-  FT_BASE( FT_Int32 )
+  FT_BASE( FT_Fixed )
   FT_MulAddFix( FT_Fixed*  s,
                 FT_Int32*  f,
                 FT_UInt    count );
