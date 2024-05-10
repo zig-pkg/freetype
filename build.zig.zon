@@ -1,0 +1,18 @@
+.{
+    .name = "freetype",
+    .version = "2.13.2",
+    .paths = .{
+        "include",
+        "src",
+        "build.zig",
+        "build.zig.zon",
+        "LICENSE.txt",
+        "README.md",
+    },
+    .dependencies = .{
+        .brotli = .{
+            .url = "https://github.com/zig-pkg/brotli/archive/99c379ea5e0d73da9a7d5f60c2ec118b6904508d.tar.gz",
+            .hash = "1220adfc8a610747608ea06ccf91c68650420e9986285c3e8ddff09687a7f2deb336",
+        },
+    },
+}
