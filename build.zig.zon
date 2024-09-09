@@ -11,8 +11,8 @@
     },
     .dependencies = .{
         .brotli = .{
-            .url = "https://github.com/zig-pkg/brotli/archive/99c379ea5e0d73da9a7d5f60c2ec118b6904508d.tar.gz",
-            .hash = "1220adfc8a610747608ea06ccf91c68650420e9986285c3e8ddff09687a7f2deb336",
+            .url = "https://github.com/zig-pkg/brotli/archive/1a7be01b11539a53350b2845475ad8ec0c683c0c.tar.gz",
+            .hash = "1220be6292740b1b8b9313cae93cf39848da5e0a30f81ca3e1f6acccdc3f73648e1a",
         },
     },
 }
