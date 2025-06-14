@@ -1,5 +1,6 @@
 .{
-    .name = "freetype",
+    .name = .freetype,
+    .fingerprint = 0xac2059b646546e7e,
     .version = "2.13.2",
     .paths = .{
         "include",
@@ -11,8 +12,8 @@
     },
     .dependencies = .{
         .brotli = .{
-            .url = "https://github.com/zig-pkg/brotli/archive/1a7be01b11539a53350b2845475ad8ec0c683c0c.tar.gz",
-            .hash = "1220be6292740b1b8b9313cae93cf39848da5e0a30f81ca3e1f6acccdc3f73648e1a",
+            .url = "git+https://github.com/zig-pkg/brotli.git#6e3804091e7165adb0575aa6f393c698bbd7a103",
+            .hash = "brotli-1.1.0-K3J0IBSGIgAOa-bB5SWM4IuB18rm_Fk62w_T2m00AXSS",
         },
     },
 }
